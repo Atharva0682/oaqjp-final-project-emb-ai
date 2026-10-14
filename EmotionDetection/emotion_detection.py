@@ -4,7 +4,12 @@ import requests
 
 
 def emotion_detector(text_to_analyze):
-    """Run emotion detection and return formatted emotion scores."""
+    """Run emotion detection and return formatted emotion scores.
+
+    Returns a dictionary with keys anger, disgust, fear, joy, sadness
+    and dominant_emotion. When the Watson service returns HTTP 400
+    (e.g. blank input), all values are None.
+    """
     url = (
         'https://sn-watson-emotion.labs.skills.network/v1/'
         'watson.runtime.nlp.v1/NlpService/EmotionPredict'
@@ -17,6 +22,16 @@ def emotion_detector(text_to_analyze):
     response = requests.post(
         url, json=input_json, headers=headers, timeout=30
     )
+
+    if response.status_code == 400:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None,
+        }
 
     formatted_response = json.loads(response.text)
     emotions = formatted_response['emotionPredictions'][0]['emotion']
